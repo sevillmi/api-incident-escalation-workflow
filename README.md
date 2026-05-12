@@ -38,10 +38,12 @@ Webhook → Credential Validation → Priority Classification → Incident Escal
 }
 ```
 
-## Future Improvements
+## Screenshots
 
-* Slack integration
-* Retry logic
-* Incident timestamps
-* Logging system
-* Dashboard frontend
+### Workflow Overview
+
+![Workflow Overview](workflow-overview.png)
+
+### Discord Alert Example
+
+![Discord Alert](discord-alert.png)
