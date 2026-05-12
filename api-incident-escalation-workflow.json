@@ -1,0 +1,318 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ce667b68-b76a-4b7e-af0d-97fe6bca17d8",
+              "leftValue": "={{$json.body.priority}}",
+              "rightValue": "=high",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        640,
+        0
+      ],
+      "id": "c876fa68-a444-4462-9359-f8e4d99c6f7e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c3d1daa9-363b-44e2-aae5-f3af9028760e",
+              "name": "alert_type",
+              "value": "critical_incident",
+              "type": "string"
+            },
+            {
+              "id": "99037f1f-1215-4bad-9b8a-a56e29fa0bbe",
+              "name": "team",
+              "value": "API Support Team",
+              "type": "string"
+            },
+            {
+              "id": "59e5ab14-e7b3-4857-8c21-76942c0f2ee2",
+              "name": "message",
+              "value": "Critical authentication issue detected",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        864,
+        -64
+      ],
+      "id": "649c2049-cbe7-48f4-88f3-2efbeec519e1",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://reqres.in/api/login",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_REQRES_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"email\": \"eve.holt@reqres.in\",\n  \"password\": \"cityslicka\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1072,
+        -80
+      ],
+      "id": "6d99915c-dbef-415a-bb66-91aa9534deac",
+      "name": "HTTP Request",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "support-alert",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "98631da8-bede-4925-949c-56f0b710ad5c",
+      "name": "Webhook",
+      "webhookId": "1d9e9422-451a-410e-afe0-e0a8fceefc44"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"token\": \"{{ $json.token }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1280,
+        -80
+      ],
+      "id": "ab3571d3-e302-49ec-8c1d-c7f2540d9bb9",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "961944ff-d933-4a9f-8255-24aba18bc3db",
+              "leftValue": "={{ $json.body.email }}",
+              "rightValue": "eve.holt@reqres.in",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "57b321fc-e11e-4dbf-9fdf-ee0d1d017917",
+              "leftValue": "={{ $json.body.password }}",
+              "rightValue": "=cityslicka",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": "",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "19d15148-fd85-4fd0-aa12-d8fe31d23694",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": false,\n  \"message\": \"Invalid credentials\"\n}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        112
+      ],
+      "id": "185075a8-cf8b-4723-9b78-029dd22902b5",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Incident logged with normal priority\",\n  \"priority\": \"{{ $json.body.priority }}\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        848,
+        96
+      ],
+      "id": "5af254fd-e7ec-42db-bb99-936076753230",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_DISCORD_WEBHOOK_URL",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"🚨 Critical API Incident\\n\\nIssue: {{$json.message}}\\nTeam: {{$json.team}}\\nAlert Type: {{$json.alert_type}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1168,
+        32
+      ],
+      "id": "5aaa3536-62d1-4c3e-9066-7809a8adf460",
+      "name": "HTTP Request1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "471062ea-5e3a-43d8-8c6e-9ac309e47934",
+  "meta": {
+    "instanceId": "8351f7a5df121149db7172dc4893e9100b38dc0ed26bc2f6bc31028817b2fd3f"
+  },
+  "id": "2uk25l7gVtGGjG58",
+  "tags": []
+}
